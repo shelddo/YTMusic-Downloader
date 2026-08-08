@@ -73,8 +73,8 @@ def baixar_links(links, pasta_destino, novas=True):
             "--audio-quality", "0",
             "--ffmpeg-location", r"C:\ffmpeg\bin",
             "-o", f"{pasta_novas}/%(title)s.%(ext)s",
-            #"--cookies", "cookies.txt",
             "-f", "ba/b",
+            "--cookies", "cookies.txt",
             *links
         ]
     else:
@@ -85,7 +85,6 @@ def baixar_links(links, pasta_destino, novas=True):
             "--audio-quality", "0",
             "--ffmpeg-location", r"C:\ffmpeg\bin",
             "-o", f"{pasta_destino}/%(title)s.%(ext)s",
-            #"--cookies", "cookies.txt",
             "-f", "ba/b",
             *links
         ]
@@ -102,7 +101,6 @@ def baixar_link(link, pasta_destino, novas=True):
             "--audio-quality", "0",
             "--ffmpeg-location", r"C:\ffmpeg\bin",
             "-o", f"{pasta_novas}/%(title)s.%(ext)s",
-            #"--cookies", "cookies.txt",
             "-f", "ba/b",
             link
         ]
@@ -114,7 +112,6 @@ def baixar_link(link, pasta_destino, novas=True):
             "--audio-quality", "0",
             "--ffmpeg-location", r"C:\ffmpeg\bin",
             "-o", f"{pasta_destino}/%(title)s.%(ext)s",
-            #"--cookies", "cookies.txt",
             "-f", "ba/b",
             link
         ]
@@ -123,8 +120,10 @@ def baixar_link(link, pasta_destino, novas=True):
 
 if input("Você quer baixar músicas novas para uma playlist? (s/n) ").lower() == 's':
     pasta_musicas = input("Informe o caminho da pasta de músicas: ")
-    if input ("É playlist? (s/n) ").lower() == 's':
+
+    if input("Você quer baixar uma playlist? (s/n) ").lower() == 's':
         playlist_url = input("Insira a URL da playlist: ")
+
         locais = musicas_locais(pasta_musicas)
         musicas = musicas_playlist(playlist_url)
         mapa_playlist = playlist_titulos_links(playlist_url)
@@ -134,38 +133,73 @@ if input("Você quer baixar músicas novas para uma playlist? (s/n) ").lower() =
         links_para_baixar = {}
 
         print(f"Total de {len(faltando)} músicas novas:")
-        for m in faltando:
+        for m in sorted(faltando):
             print(m)
+
         for musica in faltando:
             if musica in mapa_playlist:
                 links_para_baixar[musica] = mapa_playlist[musica]
             else:
                 print("Não encontrado:", musica)
+
         links = []
-        for musgas in links_para_baixar:
-            links.append(links_para_baixar[musgas][0])
-        input("Pressione Enter para iniciar o download...")        
-        baixar_links(links, pasta_musicas) 
+        for musica in links_para_baixar:
+            links.append(links_para_baixar[musica][0])
+
+        input("Pressione Enter para iniciar o download...")
+        baixar_links(links, pasta_musicas)
+
     else:
-        musica = input("Insira a URL da música: ")
-        locais = musicas_locais(pasta_musicas)
-        input("Pressione Enter para iniciar o download...")        
-        baixar_link(musica, pasta_musicas) 
+        print("Cole os links das músicas (um por linha).")
+        print("Pressione Enter em uma linha vazia para finalizar.")
+
+        links = []
+
+        while True:
+            link = input("> ").strip()
+            if not link:
+                break
+            links.append(link)
+
+        if links:
+            input("Pressione Enter para iniciar o download...")
+            baixar_links(links, pasta_musicas)
+        else:
+            print("Nenhum link informado.")
+
 else:
     destino = input("Informe o caminho da pasta destino: ")
-    if input ("É playlist? (s/n) ").lower() == 's':
+
+    if input("Você quer baixar uma playlist? (s/n) ").lower() == 's':
         playlist_url = input("Informe o link da playlist: ")
+
         musicas = musicas_playlist(playlist_url)
         mapa_playlist = playlist_titulos_links(playlist_url)
+
         links = []
-        for link in mapa_playlist:
-            links.append(mapa_playlist[link][0])
-        input("Pressione Enter para iniciar o download...")        
-        baixar_links(links, destino, False)
-        
-    else:
-        link = input("Informe o link da música: ")
+
+        for musica in mapa_playlist:
+            links.append(mapa_playlist[musica][0])
+
         input("Pressione Enter para iniciar o download...")
-        baixar_link(link, destino, False)
-        
+        baixar_links(links, destino, False)
+
+    else:
+        print("Cole os links das músicas (uma por linha).")
+        print("Pressione Enter em uma linha vazia para finalizar.")
+
+        links = []
+
+        while True:
+            link = input("> ").strip()
+            if not link:
+                break
+            links.append(link)
+
+        if links:
+            input("Pressione Enter para iniciar o download...")
+            baixar_links(links, destino, False)
+        else:
+            print("Nenhum link informado.")
+
 input("Downloads concluídos. Pressione Enter para sair.")
